@@ -13,12 +13,11 @@ const addProduct = async (req, res) => {
       price,
       category,
       subCategory,
-      color,  
+      color,
       cc,
       sizes,
       bestseller,
     } = req.body;
-    
 
     // Ensure user is authenticated
     if (!req.user.userId) {
@@ -37,7 +36,7 @@ const addProduct = async (req, res) => {
       !description ||
       !price ||
       !category ||
-      !cc||
+      !cc ||
       !subCategory ||
       !color ||
       !sizes
@@ -84,6 +83,8 @@ const addProduct = async (req, res) => {
       createdBy: userId,
     };
 
+    const pricetopay = (price / 100) * process.env.PERCENT;
+
     // Save product
     const product = new productModel(productData);
     await product.save();
@@ -91,7 +92,10 @@ const addProduct = async (req, res) => {
     // Add product to user's products array
     await userModel.findByIdAndUpdate(
       userId,
-      { $push: { products: product._id } },
+      {
+        $push: { products: product._id },
+        $inc: { pricetopay: pricetopay },
+      },
       { new: true }
     );
 
@@ -111,8 +115,13 @@ const listProducts = async (req, res) => {
   try {
     const products = await productModel
       .find({})
-      .populate("createdBy", "name location address");
-    res.json({ success: true, products });
+      .populate("createdBy", "name location address blocked");
+
+    // Filter out products where createdBy is blocked
+    const filteredProducts = products.filter(
+      (product) => !product.createdBy?.blocked
+    );
+    res.json({ success: true, products : filteredProducts});
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -137,13 +146,10 @@ const removeProduct = async (req, res) => {
   }
 };
 
-
 // function for single product info
 const singleProduct = async (req, res) => {
   try {
-    const { productId } = req.body || req.params; 
-    console.log(productId);
-    
+    const { productId } = req.body || req.params;
 
     if (!productId) {
       return res
@@ -333,13 +339,41 @@ const listUserProducts = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const products = await productModel.find({ createdBy: userId });
-    res.json({ success: true, products });
+    // Check if the user exists
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Fetch user's products from DB
+    const validProducts = await productModel.find({ createdBy: userId });
+
+    // Extract valid product IDs
+    const validProductIds = validProducts.map((product) =>
+      product._id.toString()
+    );
+
+    // Find and remove invalid product IDs from user's `products` array
+    const updatedProductIds = user.products.filter((productId) =>
+      validProductIds.includes(productId.toString())
+    );
+
+    // If the user's product array needs cleaning
+    if (user.products.length !== updatedProductIds.length) {
+      user.products = updatedProductIds;
+      await user.save();
+    }
+
+    res.json({ success: true, products: validProducts });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
+
 
 export {
   listProducts,

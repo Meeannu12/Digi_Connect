@@ -118,7 +118,6 @@ const placeOrder = async (req, res) => {
 
     const updateSellers = async (sellerData) => {
       try {
-        console.log("Updating sellers:", sellerData);
 
         await Promise.all(
           sellerData

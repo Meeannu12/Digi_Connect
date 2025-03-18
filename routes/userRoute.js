@@ -18,6 +18,11 @@ import {
   updatecc,
   fetchMultipleUsers,
   checkrefferalcode,
+  blockUser,
+  updateblockUser,
+  withdraw,
+  withdrawInAccount,
+  updatepricetopay,
 } from "../controllers/userController.js";
 import upload from "../middleware/multer.js";
 import authUser from "../middleware/auth.js";
@@ -46,12 +51,18 @@ userRouter.get("/fetchuserdata", authUser, fetchUserData);
 userRouter.delete("/deleteuser", authRole("admin"), removeUser);
 userRouter.post("/sendOtp", sendOtp);
 userRouter.post("/verifyOtp", verifyOtp);
+
 userRouter.get("/referred", authUser, getReferredUsers);
 userRouter.post("/addReferenceMember", authUser, addReferenceMember);
 userRouter.get("/getTeamMember", authUser, getTeamMember);
 userRouter.get("/getOptionTeam", authUser, getOptionTeam);
 userRouter.put("/updatecc", authUser, updatecc);
+userRouter.put("/updateBlocked",authRole("admin"),updateblockUser);
 userRouter.post("/check-referral", checkrefferalcode);
+userRouter.post("/block", authUser,blockUser);
 userRouter.post("/fetchMultipleUsers", authUser, fetchMultipleUsers);
+userRouter.post("/withdraw-upi", authUser, withdraw);
+userRouter.post('withdraw-bank', authUser, withdrawInAccount);
+userRouter.put("/updatePrice", authRole("admin"), updatepricetopay);
 
 export default userRouter;
