@@ -38,7 +38,14 @@ const userSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "IncomeLevel",
-        default: null
+        default: null,
+      },
+    ],
+    team: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "user",
+        default: null,
       },
     ],
 

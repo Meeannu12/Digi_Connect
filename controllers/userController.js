@@ -224,7 +224,7 @@ const registerUser = async (req, res) => {
       referralCode,
       role,
       option,
-    } = req.body;
+    } = req.body; 
 
     // Checking if the user already exists
     const checkExistdata = await userModel.findOne({
