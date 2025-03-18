@@ -12,6 +12,6 @@ incomeLevelRoute.post("/addNewLevel", authRole("admin"), addNewLevel);
 // incomeLevelRoute.get("/getAllLevel", authUser, getAllLevel);
 incomeLevelRoute.get("/getAllLevel", getAllLevel);
 // Define DELETE route
-incomeLevelRoute.delete("/delete/:id", deleteLevel);
+incomeLevelRoute.delete("/delete/:id", authRole("admin"), deleteLevel);
 
 export default incomeLevelRoute;

@@ -896,7 +896,6 @@ const updateblockUser = async (req, res) => {
   }
 };
 
-
 // withdraw payment
 const withdraw = async (req, res) => {
   try {
